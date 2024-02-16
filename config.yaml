@@ -1,0 +1,9 @@
+rapid_api:
+  key: "c4e1a77861msh9b051d14e9a0bddp1459d3jsnf85bb68ba7b9"
+  chuck_norris:
+    host: "matchilling-chuck-norris-jokes-v1.p.rapidapi.com"
+    url: "https://matchilling-chuck-norris-jokes-v1.p.rapidapi.com/jokes/random"
+  open_weather:
+    city: "worcester"
+    url: "https://open-weather13.p.rapidapi.com/city/"
+    host: "open-weather13.p.rapidapi.com"
