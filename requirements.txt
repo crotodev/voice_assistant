@@ -165,3 +165,5 @@ sounddevice==0.4.6
 SpeechRecognition==3.10.1
 typing_extensions==4.9.0
 urllib3==2.2.0
+
+PyYAML~=6.0.1

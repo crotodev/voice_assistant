@@ -6,22 +6,9 @@ import speech_recognition as sr
 from gtts import gTTS
 from playsound import playsound
 
-tmp_path = os.path.join(".", "tmp")
 
-if not os.path.exists(tmp_path):
-    os.mkdir(tmp_path)
-
-with open("config.yaml", "r") as f:
-    config = yaml.load(f, yaml.Loader)
-
-open_weather_url = config["rapid_api"]["open_weather"]["url"]
-config["rapid_api"]["open_weather"]["url"] = (
-    open_weather_url + config["rapid_api"]["open_weather"]["city"]
-)
-
-
-def say(text: str) -> None:
-    audio_file = os.path.join(tmp_path, "audio.mp3")
+def say(text: str, path: str) -> None:
+    audio_file = os.path.join(path, "audio.mp3")
     tts = gTTS(text)
     tts.save(audio_file)
     playsound(audio_file)
@@ -72,7 +59,7 @@ def make_rapid_api_request(key: str, url: str, host: str):
     return response.json()
 
 
-def say_arithmetic(text: str, operator: str) -> None:
+def say_arithmetic(text: str, operator: str, path: str) -> None:
     numbers = find_numbers(text)
     joined = f" {operator} ".join(map(str, numbers[1:]))
     text = ""
@@ -85,60 +72,78 @@ def say_arithmetic(text: str, operator: str) -> None:
     if operator == "*":
         text = f"{numbers[0]} * {joined} is {multiply(numbers)}"
     print(text)
-    say(text)
+    say(text, path)
 
 
-r = sr.Recognizer()
+def main():
+    tmp_path = os.path.join(".", "tmp")
 
-while True:
-    with sr.Microphone() as source:
-        print("Say something!")
-        audio = r.listen(source)
+    if not os.path.exists(tmp_path):
+        os.mkdir(tmp_path)
 
-    try:
-        recognized = r.recognize_google(audio)
-        if "hey pine" in recognized.lower():
-            print(recognized)
-            if "say" in recognized:
-                say(recognized[2:])
+    with open("config.yaml", "r") as f:
+        config = yaml.load(f, yaml.Loader)
 
-            if "chuck norris" in recognized.lower():
-                key = config["rapid_api"]["key"]
-                url = config["rapid_api"]["chuck_norris"]["url"]
-                host = config["rapid_api"]["chuck_norris"]["host"]
-                say(make_rapid_api_request(key, url, host)["value"])
+    open_weather_url = config["rapid_api"]["open_weather"]["url"]
+    config["rapid_api"]["open_weather"]["url"] = (
+            open_weather_url + config["rapid_api"]["open_weather"]["city"]
+    )
 
-            if "weather" in recognized.lower():
-                key = config["rapid_api"]["key"]
-                url = config["rapid_api"]["open_weather"]["url"]
-                host = config["rapid_api"]["open_weather"]["host"]
-                result = make_rapid_api_request(key, url, host)
+    r = sr.Recognizer()
 
-                temp = result["main"]["temp"]
-                feels_like = result["main"]["feels_like"]
-                temp_min = result["main"]["temp_min"]
-                temp_max = result["main"]["temp_max"]
-                humidity = result["main"]["humidity"]
-                response = (
-                    f"The temperature is {temp} degrees with a low of {temp_min} and a high of {temp_max}. It "
-                    f"feels like {feels_like} degrees. The humidity is {humidity}"
-                )
-                say(response)
+    while True:
+        with sr.Microphone() as source:
+            print("Say something!")
+            audio = r.listen(source)
 
-            if "how are you" in recognized:
-                say("I'm doing okay!")
+        try:
+            recognized = r.recognize_google(audio)
+            if "hey pine" in recognized.lower():
+                print(recognized)
+                if "say" in recognized:
+                    say(recognized[2:])
 
-            if "+" in recognized:
-                say_arithmetic(recognized, "+")
+                if "chuck norris" in recognized.lower():
+                    key = config["rapid_api"]["key"]
+                    url = config["rapid_api"]["chuck_norris"]["url"]
+                    host = config["rapid_api"]["chuck_norris"]["host"]
+                    say(make_rapid_api_request(key, url, host)["value"])
 
-            if "-" in recognized:
-                say_arithmetic(recognized, "-")
+                if "weather" in recognized.lower():
+                    key = config["rapid_api"]["key"]
+                    url = config["rapid_api"]["open_weather"]["url"]
+                    host = config["rapid_api"]["open_weather"]["host"]
+                    result = make_rapid_api_request(key, url, host)
 
-            if "/" in recognized or "divided" in recognized:
-                say_arithmetic(recognized, "/")
+                    temp = result["main"]["temp"]
+                    feels_like = result["main"]["feels_like"]
+                    temp_min = result["main"]["temp_min"]
+                    temp_max = result["main"]["temp_max"]
+                    humidity = result["main"]["humidity"]
+                    response = (
+                        f"The temperature is {temp} degrees with a low of {temp_min} and a high of {temp_max}. It "
+                        f"feels like {feels_like} degrees. The humidity is {humidity}"
+                    )
+                    say(response, tmp_path)
 
-            if "*" in recognized or "multiplied" in recognized:
-                say_arithmetic(recognized, "*")
+                if "how are you" in recognized:
+                    say("I'm doing okay!")
 
-    except sr.UnknownValueError:
-        pass
+                if "+" in recognized:
+                    say_arithmetic(recognized, "+", tmp_path)
+
+                if "-" in recognized:
+                    say_arithmetic(recognized, "-", tmp_path)
+
+                if "/" in recognized or "divided" in recognized:
+                    say_arithmetic(recognized, "/", tmp_path)
+
+                if "*" in recognized or "multiplied" in recognized:
+                    say_arithmetic(recognized, "*", tmp_path)
+
+        except sr.UnknownValueError:
+            pass
+
+
+if __name__ == 'main':
+    main()
