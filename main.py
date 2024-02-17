@@ -86,7 +86,7 @@ def main():
 
     open_weather_url = config["rapid_api"]["open_weather"]["url"]
     config["rapid_api"]["open_weather"]["url"] = (
-            open_weather_url + config["rapid_api"]["open_weather"]["city"]
+        open_weather_url + config["rapid_api"]["open_weather"]["city"]
     )
 
     r = sr.Recognizer()
@@ -127,7 +127,7 @@ def main():
                     say(response, tmp_path)
 
                 if "how are you" in recognized:
-                    say("I'm doing okay!")
+                    say("I'm doing okay!", tmp_path)
 
                 if "+" in recognized:
                     say_arithmetic(recognized, "+", tmp_path)
@@ -145,5 +145,5 @@ def main():
             pass
 
 
-if __name__ == 'main':
+if __name__ == "__main__":
     main()
